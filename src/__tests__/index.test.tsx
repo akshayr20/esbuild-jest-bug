@@ -1,5 +1,6 @@
 import { add, sub } from "../";
-import * as helpers from "../";
+import { helpers } from "../"; // DO: Helper module combines all the modules present in a file to a single object
+// import * as helpers from "../"; // DON'T
 
 describe("test positive flow", () => {
   it("should add given number", () => {
@@ -14,24 +15,18 @@ describe("test positive flow", () => {
   });
 });
 
-describe("test negative flow, this test would fail (added a workaround to fix them)", () => {
-  it("should spy add and return a fix value", () => {
-    const helperFn = { add: helpers.add };
-    jest.spyOn(helperFn, "add").mockReturnValue(1);
-    // Pointing at correct point in memory
-    expect(helperFn.add(2, 3, 3)).toBe(1);
-    // Pointing at incorrect point in memory, directly consuming from the file
-    // Reason for such usage is discussed in last test suite
-    // Fails: ==> expect(add(2, 3, 3)).toBe(1);
+describe("spy and mock real fn", () => {
+  it("should spy add and return a updated value", () => {
+    jest.spyOn(helpers, "add").mockReturnValue(1);
+    expect(helpers.add(2, 3, 3)).toBe(1);
+    // expect(add(2, 3, 3)).toBe(1); // THIS STILL FAILS
+    expect(helpers.add(2, 3, 3)).toBe(1); // changed consumption from add to helpers.add
   });
-  it("should spy add and return a fix value", () => {
-    const helperFn = { sub: helpers.sub };
-    jest.spyOn(helperFn, "sub").mockReturnValue(2);
-    // Pointing a correct point in memory
-    expect(helperFn.sub(6, 2, 1)).toBe(2);
-    // Pointing at incorrect point in memory, directly consuming from the file
-    // Reason for such usage is discussed in last test suite
-    // Fails: ==> expect(sub(2, 3, 3)).toBe(2);
+  it("should spy sub and return a updated value", () => {
+    jest.spyOn(helpers, "sub").mockReturnValue(2);
+    expect(helpers.sub(6, 2, 1)).toBe(2);
+    // expect(sub(2, 3)).toBe(2); THIS STILL FAILS
+    expect(helpers.sub(2, 3)).toBe(2); // changed consumption from add to helpers.sub
   });
 });
 
@@ -40,17 +35,13 @@ describe("test negative flow, this test would fail (added a workaround to fix th
 // We are spying the methods, and on a specific condition checking weather the spy was correctly invoked
 describe("DESIRED FLOW: ==>", () => {
   it("SHOULD spy add CHECK IF THE FUNCTION WAS CALLED", () => {
-    const helperFn = { add: helpers.add };
-    const spyAddFn = jest.spyOn(helperFn, "add");
-    // points at incorrect point in memory
-    helpers.invokeAdd();
+    const spyAddFn = jest.spyOn(helpers, "add");
+    helpers.add(1, 2);
     expect(spyAddFn).toHaveBeenCalled();
   });
   it("should spy add and return a fix value", () => {
-    const helperFn = { sub: helpers.sub };
-    const spySubFn = jest.spyOn(helperFn, "sub");
-    // points at incorrect point in memory
-    helpers.invokeSub();
+    const spySubFn = jest.spyOn(helpers, "sub");
+    helpers.sub(3, 2);
     expect(spySubFn).toHaveBeenCalled();
   });
 });
